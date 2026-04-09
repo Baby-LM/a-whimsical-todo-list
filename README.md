@@ -2,7 +2,7 @@
 
 A cozy notebook-style To-Do List with a built-in Pomodoro Timer — all in a single HTML file, no installation needed.
 
-[Try Here]([https://baby-lm.github.io/my-todo-list/my-todo-list.html])
+[Try Here](https://baby-lm.github.io/a-whimsical-todo-list/my-todo-list.html)
 
 ---
 
