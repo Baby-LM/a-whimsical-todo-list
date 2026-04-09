@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍓 Todo List</title>
+<style>
+@font-face {
+  font-family: 'Lexend';
+  src: url('fonts/Lexend-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+/* ── Warm Cream + Soft Purple ── */
+:root {
+  --pink-bg:     #f0e6d3;
+  --pink-paper:  #fffef8;
+  --pink-mid:    #ddd0b8;
+  --pink-deep:   #c8b898;
+  --pink-accent: #7c6bc8;
+  --pink-text:   #3a3250;
+  --pink-soft:   #b0a8c8;
+  --line-color:  #d4e6f5;
+  --margin-line: rgba(220,140,140,0.32);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 20% 10%,  #f9e4c8 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 85%,  #e8d5f0 0%, transparent 50%),
+    radial-gradient(ellipse at 55% 45%,  #fdf0e0 0%, transparent 55%),
+    var(--pink-bg);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 36px 20px 80px;
+  font-family: 'Lexend', sans-serif;
+}
+
+
+/* ── Page layout: paper + pomo side by side ── */
+.page-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 860px;
+}
+
+/* ── Paper (notebook) ── */
+.paper {
+  flex: 1;
+  min-width: 0;
+  background: var(--pink-paper);
+  border-radius: 4px 4px 8px 8px;
+  box-shadow:
+    0 2px 0 var(--pink-mid),
+    0 4px 0 var(--pink-deep),
+    5px 8px 40px rgba(180,100,100,0.14),
+    -2px 4px 20px rgba(180,100,100,0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ruled lines */
+.lines-bg {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    transparent 0px, transparent 43px,
+    var(--line-color) 43px, var(--line-color) 45px
+  );
+  background-position: 0 132px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Margin line */
+.paper::before {
+  content: '';
+  position: absolute;
+  left: 58px; top: 0; bottom: 0;
+  width: 1.5px;
+  background: var(--margin-line);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Spiral holes */
+.holes {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 58px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 28px;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+.hole {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--pink-bg);
+  border: 2px solid var(--pink-mid);
+  box-shadow: inset 0 1px 3px rgba(180,100,100,0.2);
+  margin-bottom: 44px;
+  flex-shrink: 0;
+}
+
+/* ── Paper content ── */
+.content {
+  position: relative;
+  z-index: 3;
+  padding: 22px 24px 36px 72px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Title */
+.title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 2px;
+}
+.title {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--pink-text);
+  line-height: 1.2;
+  outline: none;
+  cursor: text;
+  border-bottom: 2px dashed transparent;
+  transition: border-color .2s;
+  min-width: 40px;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  flex: 1;
+  min-height: 36px;
+}
+.title:hover, .title:focus { border-bottom-color: var(--pink-soft); }
+.title:empty::before { content: attr(data-placeholder); color: var(--pink-soft); }
+
+.title-hint {
+  font-size: 10px;
+  color: var(--pink-soft);
+  margin-top: 8px;
+  font-weight: 300;
+  white-space: nowrap;
+  flex-shrink: 0;
+  opacity: .65;
+}
+
+
+.divider {
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--pink-mid) 15%, var(--pink-mid) 85%, transparent);
+  border-radius: 2px;
+  margin: 12px 0 14px;
+}
+
+/* ── Add area ── */
+.add-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1.5px dashed var(--pink-mid);
+  margin-bottom: 6px;
+}
+.add-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  opacity: .55;
+  line-height: 1;
+}
+.add-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--pink-text);
+  caret-color: var(--pink-accent);
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.add-input::placeholder { color: var(--pink-soft); font-weight: 300; }
+.add-btn {
+  background: var(--pink-accent);
+  border: none;
+  color: #fff;
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all .15s;
+  letter-spacing: .3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(196,120,120,0.28);
+}
+.add-btn:hover  { background: var(--pink-text); transform: translateY(-1px); }
+.add-btn:active { transform: none; }
+
+/* ── Task list ── */
+.task-list { display: flex; flex-direction: column; }
+
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 0 8px;
+  min-height: 42px;
+  position: relative;
+  animation: slideIn .22s cubic-bezier(.34,1.36,.64,1);
+}
+@keyframes slideIn {
+  from { opacity:0; transform: translateX(-10px); }
+  to   { opacity:1; transform: none; }
+}
+
+.cb {
+  width: 20px; height: 20px;
+  border: 2px solid var(--pink-mid);
+  border-radius: 6px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+  background: transparent;
+  position: relative;
+  overflow: hidden;
+}
+.cb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--pink-accent);
+  border-radius: 4px;
+  transform: scale(0);
+  transition: transform .2s cubic-bezier(.34,1.56,.64,1);
+}
+.task-item:hover .cb { border-color: var(--pink-accent); }
+.task-item.done .cb  { border-color: var(--pink-accent); }
+.task-item.done .cb::after { transform: scale(1); }
+.cb-check {
+  font-size: 12px; color: #fff;
+  position: relative; z-index: 1;
+  transform: scale(0) rotate(-30deg);
+  transition: transform .2s cubic-bezier(.34,1.56,.64,1) .05s;
+  line-height: 1;
+}
+.task-item.done .cb-check { transform: scale(1) rotate(0); }
+
+.task-txt {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--pink-text);
+  line-height: 1.5;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  position: relative;
+  padding: 1px 2px;
+  transition: color .2s;
+  user-select: none;
+}
+.task-item.done .task-txt { color: var(--pink-soft); }
+
+/* Whoosh strikethrough */
+.strike {
+  position: absolute;
+  left: 0; top: 50%;
+  height: 2px;
+  width: 0%;
+  background: var(--pink-soft);
+  border-radius: 2px;
+  pointer-events: none;
+  transition: width .32s cubic-bezier(.4,0,.2,1);
+}
+.task-item.done .strike { width: 100%; }
+
+.del-btn {
+  background: none; border: none;
+  font-size: 14px;
+  color: var(--pink-mid);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 50%;
+  transition: all .15s;
+  opacity: 0;
+  flex-shrink: 0;
+  margin-top: 3px;
+  line-height: 1;
+}
+.task-item:hover .del-btn { opacity: 1; }
+.del-btn:hover { color: var(--pink-accent) !important; transform: scale(1.2); }
+
+.task-item.removing {
+  animation: removeOut .26s ease-in forwards;
+}
+@keyframes removeOut {
+  to { opacity:0; transform: translateX(20px) scale(.94); max-height:0; padding:0; margin:0; overflow:hidden; }
+}
+
+/* Empty state */
+.empty-state {
+  display: none;
+  text-align: center;
+  padding: 30px 16px;
+  color: var(--pink-soft);
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 2.4;
+}
+.empty-state.show { display: block; }
+
+/* Footer */
+.footer {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1.5px dashed var(--pink-mid);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.footer-count {
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--pink-soft);
+  font-style: italic;
+  white-space: nowrap;
+}
+.clear-btn {
+  background: none;
+  border: 1.5px dashed var(--pink-mid);
+  color: var(--pink-soft);
+  font-family: 'Lexend', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  padding: 3px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.clear-btn:hover { border-color: var(--pink-accent); color: var(--pink-accent); }
+
+/* ════════════════════════════════════
+   POMODORO PANEL (right side)
+════════════════════════════════════ */
+.pomo-panel {
+  width: 210px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: sticky;
+  top: 36px;
+}
+
+.pomo-card {
+  background: var(--pink-paper);
+  border-radius: 4px 4px 8px 8px;
+  box-shadow:
+    0 2px 0 var(--pink-mid),
+    0 4px 0 var(--pink-deep),
+    4px 6px 28px rgba(180,100,100,0.12);
+  overflow: hidden;
+  position: relative;
+}
+/* top tape strip */
+.pomo-card::before {
+  content: '';
+  display: block;
+  height: 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--pink-mid) 0, var(--pink-mid) 14px,
+    var(--pink-deep) 14px, var(--pink-deep) 16px
+  );
+}
+
+.pomo-inner {
+  padding: 14px 16px 18px;
+}
+
+.pomo-header {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--pink-soft);
+  letter-spacing: 1.8px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pomo-mode-badge {
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .6px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: var(--pink-mid);
+  color: var(--pink-text);
+  transition: all .3s;
+}
+.pomo-mode-badge.break-mode {
+  background: #cce8c4;
+  color: #3a5a2a;
+}
+
+/* Tomato circle display */
+.pomo-circle-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.pomo-circle {
+  position: relative;
+  width: 110px; height: 110px;
+}
+.pomo-svg {
+  width: 110px; height: 110px;
+  transform: rotate(-90deg);
+}
+.pomo-track {
+  fill: none;
+  stroke: var(--line-color);
+  stroke-width: 5;
+}
+.pomo-ring {
+  fill: none;
+  stroke: var(--pink-accent);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 283;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset .8s linear, stroke .5s;
+}
+.pomo-ring.break-ring { stroke: #7ec87e; }
+.pomo-mode-badge.break-mode { background: #cce8c4; color: #3a5a2a; }
+.pomo-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.pomo-tomato-icon {
+  font-size: 28px;
+  line-height: 1;
+  transition: all .3s;
+}
+.pomo-tomato-icon.active {
+  animation: tomatoPulse 2s ease-in-out infinite;
+}
+@keyframes tomatoPulse {
+  0%,100% { transform: scale(1); }
+  50%      { transform: scale(1.12); }
+}
+.pomo-time-display {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--pink-text);
+  letter-spacing: .5px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* Status text */
+.pomo-status {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 300;
+  color: var(--pink-soft);
+  margin-bottom: 12px;
+  min-height: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Session dots */
+.pomo-sessions {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.p-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--line-color);
+  border: 1.5px solid var(--pink-mid);
+  transition: all .35s;
+}
+.p-dot.done { background: var(--pink-accent); border-color: var(--pink-accent); }
+
+/* Buttons */
+.pomo-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.p-btn {
+  border: 1.5px solid var(--pink-mid);
+  background: var(--pink-paper);
+  color: var(--pink-text);
+  font-family: 'Lexend', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 7px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all .14s;
+  letter-spacing: .3px;
+  text-align: center;
+  width: 100%;
+}
+.p-btn:hover { background: var(--pink-mid); border-color: var(--pink-deep); }
+.p-btn.primary {
+  background: var(--pink-accent);
+  color: #fff;
+  border-color: var(--pink-accent);
+  font-weight: 600;
+}
+.p-btn.primary:hover { background: var(--pink-text); border-color: var(--pink-text); }
+
+.pomo-row2 {
+  display: flex;
+  gap: 6px;
+}
+.pomo-row2 .p-btn { font-size: 10px; }
+
+/* Tip card below pomo */
+.tip-card {
+  background: var(--pink-paper);
+  border-radius: 4px 4px 8px 8px;
+  box-shadow:
+    0 2px 0 var(--pink-mid),
+    0 4px 0 var(--pink-deep),
+    4px 6px 24px rgba(180,100,100,0.10);
+  padding: 12px 14px;
+  font-size: 11px;
+  font-weight: 300;
+  color: var(--pink-soft);
+  line-height: 1.8;
+  text-align: center;
+}
+.tip-card strong { color: var(--pink-accent); font-weight: 600; }
+
+/* ── Sakura petals ── */
+.sakura-petal {
+  position: fixed;
+  border-radius: 150% 0 150% 0;
+  pointer-events: none;
+  z-index: 9990;
+  opacity: 0;
+  animation: sakuraFall ease-in-out forwards;
+  will-change: transform, opacity;
+}
+@keyframes sakuraFall {
+  0%   { opacity: 0;    transform: translate(0px,       0)    rotate(0deg);   }
+  7%   { opacity: 1;                                                           }
+  25%  {               transform: translate(12px,   24vh)   rotate(80deg);  }
+  45%  {               transform: translate(28px,   45vh)   rotate(165deg); }
+  65%  {               transform: translate(16px,   65vh)   rotate(235deg); }
+  85%  {               transform: translate(42px,   86vh)   rotate(300deg); }
+  93%  { opacity: 0.9; }
+  100% { opacity: 0;    transform: translate(58px,  108vh)  rotate(360deg); }
+}
+
+/* ── Global overflow guard ── */
+.page-layout { overflow-x: hidden; }
+
+.title-row {
+  width: 100%;
+  overflow: hidden;
+}
+.title {
+  max-width: calc(100% - 52px);
+  overflow: hidden;
+}
+.task-txt {
+  max-width: 100%;
+}
+.add-area {
+  width: 100%;
+  overflow: hidden;
+}
+.footer {
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════
+   MOBILE RESPONSIVE (≤ 640px)
+══════════════════════════════════ */
+@media (max-width: 640px) {
+
+  body {
+    padding: 16px 12px 60px;
+  }
+
+  /* Stack columns vertically */
+  .page-layout {
+    flex-direction: column;
+    gap: 16px;
+    max-width: 100%;
+  }
+
+  .paper {
+    width: 100%;
+  }
+
+  .content {
+    padding: 16px 16px 28px 64px;
+  }
+
+  .title {
+    font-size: 22px;
+    max-width: calc(100% - 44px);
+  }
+
+  /* Pomodoro panel: full width, horizontal layout */
+  .pomo-panel {
+    width: 100%;
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .pomo-card {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .tip-card {
+    flex: 1;
+    min-width: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: left;
+    line-height: 2;
+  }
+
+  /* Always show delete button (no hover on touch) */
+  .del-btn {
+    opacity: 1 !important;
+    color: var(--pink-soft);
+  }
+
+  /* Bigger tap targets */
+  .cb {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+  }
+
+  .add-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .task-txt {
+    font-size: 14px;
+  }
+
+  /* Prevent iOS auto-zoom on input focus */
+  .add-input {
+    font-size: 16px;
+  }
+
+  .pomo-circle, .pomo-svg {
+    width: 90px;
+    height: 90px;
+  }
+
+  .pomo-time-display {
+    font-size: 17px;
+  }
+
+  .pomo-tomato-icon {
+    font-size: 22px;
+  }
+}
+
+/* ══════════════════════════════════
+   EXTRA SMALL (≤ 380px)
+══════════════════════════════════ */
+@media (max-width: 380px) {
+
+  body {
+    padding: 12px 8px 50px;
+  }
+
+  .content {
+    padding: 14px 12px 24px 56px;
+  }
+
+  .holes {
+    width: 48px;
+  }
+
+  .paper::before {
+    left: 48px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .pomo-panel {
+    flex-direction: column;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="page-layout">
+
+  <!-- ════ NOTEBOOK PAPER ════ -->
+  <div class="paper">
+    <div class="lines-bg"></div>
+    <div class="holes">
+      <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+      <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+      <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+      <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+      <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+    </div>
+
+    <div class="content">
+
+      <!-- Header -->
+      <div class="title-row">
+        <div
+          id="page-title"
+          class="title"
+          contenteditable="true"
+          spellcheck="false"
+          data-placeholder="🍓 Todo List"
+        >🍓 Todo List &nbsp;𑣲₍ ᐢ. .ᐢ₎</div>
+        <div class="title-hint">✎ edit</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Add task -->
+      <div class="add-area">
+        <div class="add-icon">✏️</div>
+        <input id="task-input" class="add-input" type="text" placeholder="write something to do..." maxlength="80">
+        <button class="add-btn" onclick="addTask()">+ add</button>
+      </div>
+
+      <!-- Tasks -->
+      <div class="task-list" id="task-list"></div>
+      <div class="empty-state" id="empty-state">
+        all clear~ nothing to do!<br>
+        <span style="font-size:12px">write your first task above ↑</span>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <span class="footer-count" id="footer-count">0 tasks</span>
+        <button class="clear-btn" onclick="clearDone()">✗ clear done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ POMODORO PANEL (right) ════ -->
+  <div class="pomo-panel">
+    <div class="pomo-card">
+      <div class="pomo-inner">
+
+        <div class="pomo-header">
+          🍅 POMODORO
+          <span class="pomo-mode-badge" id="pomo-badge">FOCUS</span>
+        </div>
+
+        <!-- Circle timer -->
+        <div class="pomo-circle-wrap">
+          <div class="pomo-circle">
+            <svg class="pomo-svg" viewBox="0 0 100 100">
+              <circle class="pomo-track" cx="50" cy="50" r="45"/>
+              <circle class="pomo-ring" id="pomo-ring" cx="50" cy="50" r="45"/>
+            </svg>
+            <div class="pomo-center">
+              <div class="pomo-tomato-icon" id="pomo-icon">🍅</div>
+              <div class="pomo-time-display" id="pomo-time">25:00</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pomo-status" id="pomo-status">tap start~</div>
+
+        <!-- Session dots -->
+        <div class="pomo-sessions" id="pomo-dots">
+          <div class="p-dot"></div>
+          <div class="p-dot"></div>
+          <div class="p-dot"></div>
+          <div class="p-dot"></div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="pomo-btns">
+          <button class="p-btn primary" id="pomo-start" onclick="pomoToggle()">▶ Start</button>
+          <div class="pomo-row2">
+            <button class="p-btn" onclick="pomoReset()">↺ Reset</button>
+            <button class="p-btn" id="pomo-switch" onclick="pomoSwitch()">☕ Break</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- end page-layout -->
+
+<script>
+// ══════════════════════════════════
+// SOFT MECHANICAL KEYBOARD (thock)
+// ══════════════════════════════════
+let _kbCtx = null;
+function getKbCtx() {
+  if (!_kbCtx) _kbCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return _kbCtx;
+}
+
+function playTypewriter(key) {
+  try {
+    const ctx     = getKbCtx();
+    const isSpace  = key === ' ';
+    const isReturn = key === 'Enter';
+
+    // ── "Thock" body: low-mid noise burst ──
+    const thockDur = isReturn ? 0.13 : 0.09;
+    const thockBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * thockDur), ctx.sampleRate);
+    const thockData = thockBuf.getChannelData(0);
+    for (let i = 0; i < thockData.length; i++) {
+      const t = i / ctx.sampleRate;
+      // Slower decay = softer, rounder feel
+      thockData[i] = (Math.random() * 2 - 1) * Math.exp(-t * (isReturn ? 22 : 32));
+    }
+    const thockSrc = ctx.createBufferSource();
+    thockSrc.buffer = thockBuf;
+
+    // Low-pass: cut harsh highs → warm thock
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = isSpace ? 320 : 420 + Math.random() * 60;
+    lp.Q.value = 0.5;
+
+    // Slight low-shelf boost → deeper body
+    const shelf = ctx.createBiquadFilter();
+    shelf.type = 'lowshelf';
+    shelf.frequency.value = 180;
+    shelf.gain.value = isSpace ? 8 : 5;
+
+    // ── Click transient: very short high-freq tick ──
+    const tickDur = 0.014;
+    const tickBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * tickDur), ctx.sampleRate);
+    const tickData = tickBuf.getChannelData(0);
+    for (let i = 0; i < tickData.length; i++) {
+      tickData[i] = (Math.random() * 2 - 1) * Math.exp(-(i / ctx.sampleRate) * 280);
+    }
+    const tickSrc = ctx.createBufferSource();
+    tickSrc.buffer = tickBuf;
+
+    const tickHp = ctx.createBiquadFilter();
+    tickHp.type = 'highpass';
+    tickHp.frequency.value = 2200;
+
+    // ── Gains ──
+    const thockGain = ctx.createGain();
+    thockGain.gain.setValueAtTime(isSpace ? 0.18 : 0.14, ctx.currentTime);
+
+    const tickGain = ctx.createGain();
+    tickGain.gain.setValueAtTime(isReturn ? 0.06 : 0.07, ctx.currentTime);
+
+    // Wire thock chain
+    thockSrc.connect(lp);
+    lp.connect(shelf);
+    shelf.connect(thockGain);
+    thockGain.connect(ctx.destination);
+
+    // Wire tick chain
+    tickSrc.connect(tickHp);
+    tickHp.connect(tickGain);
+    tickGain.connect(ctx.destination);
+
+    thockSrc.start(); thockSrc.stop(ctx.currentTime + thockDur + 0.02);
+    tickSrc.start();  tickSrc.stop(ctx.currentTime + tickDur + 0.01);
+  } catch(e) {}
+}
+
+// ══════════════════════════════════
+// WHOOSH SOUND
+// ══════════════════════════════════
+function playWhoosh() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const dur = 0.28;
+    const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(2800, ctx.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(180, ctx.currentTime + dur);
+    filter.Q.value = 0.6;
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.22, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    src.start();
+    src.stop(ctx.currentTime + dur);
+  } catch(e) {}
+}
+
+// ══════════════════════════════════
+// POMODORO
+// ══════════════════════════════════
+const POMO_DUR = { FOCUS: 25 * 60, BREAK: 5 * 60 };
+const CIRC_R   = 45;
+const CIRC_C   = 2 * Math.PI * CIRC_R; // ≈ 283
+
+let pomo = {
+  mode: 'FOCUS', total: POMO_DUR.FOCUS, left: POMO_DUR.FOCUS,
+  running: false, sessions: 0, timer: null
+};
+
+function pomoToggle() {
+  if (pomo.running) {
+    pomo.running = false;
+    clearInterval(pomo.timer);
+    document.getElementById('pomo-start').textContent = '▶ Resume';
+    document.getElementById('pomo-icon').classList.remove('active');
+    document.getElementById('pomo-status').textContent = 'paused~';
+  } else {
+    pomo.running = true;
+    pomo.timer = setInterval(pomoTick, 1000);
+    document.getElementById('pomo-start').textContent = '⏸ Pause';
+    document.getElementById('pomo-icon').classList.add('active');
+    document.getElementById('pomo-status').textContent =
+      pomo.mode === 'FOCUS' ? 'focusing... ✦' : 'resting... ☕';
+  }
+}
+
+function pomoTick() {
+  pomo.left--;
+  if (pomo.left <= 0) {
+    pomo.running = false;
+    clearInterval(pomo.timer);
+    pomo.left = 0;
+    pomoRender();
+    if (pomo.mode === 'FOCUS') {
+      pomo.sessions = Math.min(pomo.sessions + 1, 4);
+      pomoNotify('🍅 Done! Time for a break~');
+      if (pomo.sessions >= 4) setTimeout(() => { pomo.sessions = 0; pomoRender(); }, 3000);
+    } else {
+      pomoNotify('✦ Break over! Back to focus~');
+    }
+    document.getElementById('pomo-start').textContent = '▶ Start';
+    document.getElementById('pomo-icon').classList.remove('active');
+    pomoRender();
+    return;
+  }
+  pomoRender();
+}
+
+function pomoReset() {
+  clearInterval(pomo.timer);
+  pomo.running = false;
+  pomo.left = pomo.total;
+  document.getElementById('pomo-start').textContent = '▶ Start';
+  document.getElementById('pomo-icon').classList.remove('active');
+  document.getElementById('pomo-status').textContent = 'tap start~';
+  pomoRender();
+}
+
+function pomoSwitch() {
+  clearInterval(pomo.timer);
+  pomo.running = false;
+  if (pomo.mode === 'FOCUS') {
+    pomo.mode = 'BREAK'; pomo.total = POMO_DUR.BREAK;
+    document.getElementById('pomo-switch').textContent = '🍅 Focus';
+    document.getElementById('pomo-badge').textContent  = 'BREAK';
+    document.getElementById('pomo-badge').classList.add('break-mode');
+    document.getElementById('pomo-ring').classList.add('break-ring');
+    document.getElementById('pomo-status').textContent = 'break time~ ☕';
+  } else {
+    pomo.mode = 'FOCUS'; pomo.total = POMO_DUR.FOCUS;
+    document.getElementById('pomo-switch').textContent = '☕ Break';
+    document.getElementById('pomo-badge').textContent  = 'FOCUS';
+    document.getElementById('pomo-badge').classList.remove('break-mode');
+    document.getElementById('pomo-ring').classList.remove('break-ring');
+    document.getElementById('pomo-status').textContent = 'tap start~';
+  }
+  pomo.left = pomo.total;
+  document.getElementById('pomo-start').textContent = '▶ Start';
+  document.getElementById('pomo-icon').classList.remove('active');
+  pomoRender();
+}
+
+function pomoRender() {
+  const m = String(Math.floor(pomo.left / 60)).padStart(2,'0');
+  const s = String(pomo.left % 60).padStart(2,'0');
+  document.getElementById('pomo-time').textContent = `${m}:${s}`;
+  // SVG ring offset
+  const pct = pomo.left / pomo.total;
+  document.getElementById('pomo-ring').style.strokeDashoffset = CIRC_C * (1 - pct);
+  // Session dots
+  document.querySelectorAll('.p-dot').forEach((d,i) =>
+    d.classList.toggle('done', i < pomo.sessions));
+}
+
+function pomoNotify(msg) {
+  document.getElementById('pomo-status').textContent = msg;
+  if (Notification?.permission === 'granted') {
+    new Notification('🍓 Todo List', { body: msg });
+  }
+}
+
+
+// ══════════════════════════════════
+// TASKS
+// ══════════════════════════════════
+let tasks  = [];
+let nextId = 1;
+
+function loadData() {
+  try {
+    const s = JSON.parse(localStorage.getItem('todo-sb-v2'));
+    if (s) { tasks = s.tasks || []; nextId = s.nextId || 1; }
+  } catch(e) {}
+}
+function saveData() {
+  localStorage.setItem('todo-sb-v2', JSON.stringify({ tasks, nextId }));
+}
+
+function addTask() {
+  const inp = document.getElementById('task-input');
+  const txt = inp.value.trim();
+  if (!txt) { inp.focus(); return; }
+  tasks.push({ id: nextId++, txt, done: false });
+  inp.value = '';
+  inp.focus();
+  render();
+  saveData();
+}
+
+function toggleTask(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  const wasUndone = !t.done;
+  t.done = !t.done;
+  if (wasUndone) playWhoosh(); // whoosh only when marking done
+  render();
+  saveData();
+}
+
+function deleteTask(id) {
+  const el = document.querySelector(`[data-tid="${id}"]`);
+  if (el) {
+    el.classList.add('removing');
+    setTimeout(() => { tasks = tasks.filter(x => x.id !== id); render(); saveData(); }, 260);
+  }
+}
+
+function clearDone() {
+  const doneEls = document.querySelectorAll('.task-item.done');
+  if (!doneEls.length) return;
+  doneEls.forEach(el => el.classList.add('removing'));
+  setTimeout(() => { tasks = tasks.filter(x => !x.done); render(); saveData(); }, 260);
+}
+
+function render() {
+  const list  = document.getElementById('task-list');
+  const empty = document.getElementById('empty-state');
+  const count = document.getElementById('footer-count');
+
+  if (!tasks.length) {
+    list.innerHTML = '';
+    empty.classList.add('show');
+    count.textContent = '0 tasks';
+    return;
+  }
+  empty.classList.remove('show');
+
+  const doneCount = tasks.filter(x => x.done).length;
+  count.textContent = doneCount > 0
+    ? `${doneCount}/${tasks.length} done ✓`
+    : `${tasks.length} task${tasks.length !== 1 ? 's' : ''}`;
+
+  const sorted = [...tasks.filter(x => !x.done), ...tasks.filter(x => x.done)];
+  list.innerHTML = sorted.map(t => `
+    <div class="task-item ${t.done ? 'done' : ''}" data-tid="${t.id}">
+      <div class="cb" onclick="toggleTask(${t.id})">
+        <span class="cb-check">✓</span>
+      </div>
+      <div class="task-txt" onclick="toggleTask(${t.id})">
+        ${esc(t.txt)}
+        <div class="strike"></div>
+      </div>
+      <button class="del-btn" onclick="deleteTask(${t.id})" title="delete">✕</button>
+    </div>`).join('');
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Typewriter: fire on every keydown in task input
+document.getElementById('task-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { addTask(); playTypewriter('Enter'); }
+  else if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.length <= 1) {
+    playTypewriter(e.key);
+  }
+});
+
+// Save title
+document.getElementById('page-title').addEventListener('blur', () => {
+  localStorage.setItem('todo-title-v2', document.getElementById('page-title').innerHTML);
+});
+const savedTitle = localStorage.getItem('todo-title-v2');
+if (savedTitle) document.getElementById('page-title').innerHTML = savedTitle;
+
+// Boot
+loadData();
+render();
+pomoRender();
+
+if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+  Notification.requestPermission();
+}
+
+// ══════════════════════════════════
+// SAKURA PETALS — left side only
+// ══════════════════════════════════
+// Sakura: vivid pink tones, higher opacity
+const PETAL_COLORS = [
+  'rgba(242, 160, 185, 0.92)',
+  'rgba(236, 140, 170, 0.88)',
+  'rgba(248, 175, 198, 0.90)',
+  'rgba(230, 130, 162, 0.86)',
+  'rgba(252, 185, 208, 0.93)',
+  'rgba(238, 150, 178, 0.89)',
+];
+
+function spawnPetal() {
+  const el = document.createElement('div');
+  el.className = 'sakura-petal';
+
+  // Left corridor: 0–16vw so they sway into view from the left
+  const leftVw = 0.5 + Math.random() * 15;
+  const dur    = 6 + Math.random() * 5;          // 6–11 s
+  const size   = 9 + Math.random() * 8;          // 9–17 px
+  const color  = PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)];
+  const initRot = Math.random() * 360;
+  // Each petal gets its own slightly different sway offset for variety
+  const swayX  = 30 + Math.random() * 30;        // how far right it drifts total
+
+  el.style.cssText = `
+    left: ${leftVw}vw;
+    top: -${size + 4}px;
+    width: ${size}px;
+    height: ${size * 1.38}px;
+    background: ${color};
+    animation-duration: ${dur}s;
+    transform: rotate(${initRot}deg);
+    filter: drop-shadow(0 1px 2px rgba(200,100,130,0.22));
+  `;
+
+  // Override the translateX keyframe values per-petal with a CSS variable
+  el.style.setProperty('--sx', swayX + 'px');
+
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), (dur + 0.6) * 1000);
+}
+
+// Initial burst
+for (let i = 0; i < 7; i++) setTimeout(spawnPetal, i * 350);
+// Continuous flow
+setInterval(spawnPetal, 850);
+</script>
+</body>
+</html>
